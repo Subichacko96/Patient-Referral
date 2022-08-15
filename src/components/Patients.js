@@ -103,6 +103,7 @@ export default class Patients extends Component {
     console.log(this.state.patientsArr);
   };
   initializeData = async () => {
+    this.setState({isLoading:true})
     const patientData = db.collection("patientData");
     const snapshot = await patientData.get();
     const patientArr = snapshot.docs.map((doc) => {
@@ -129,7 +130,7 @@ export default class Patients extends Component {
       address1: null,
       notes: null,
     });
-    this.setState({ patientsArr: patientArr });
+    this.setState({ patientsArr: patientArr,isLoading:false });
   };
 
   submitData = async () => {
