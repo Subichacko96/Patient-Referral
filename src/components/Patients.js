@@ -206,7 +206,7 @@ export default class Patients extends Component {
             >
               {this.state.patientsArr.map((data, index) => {
                 const length=this.state.patientsArr.length;
-                const fullName=data.firstName?data.firstName+' '+data.lastName:"New Referral";
+                const fullName=data.firstName?data.firstName+' '+(data.lastName ?? ""):"New Referral";
                 //console.log(length,"my length")
                 return(<>  
                 <Accordion sx={{mt:1,borderRadius:1}}  defaultExpanded={false} >   
