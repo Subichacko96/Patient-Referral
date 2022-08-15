@@ -33,18 +33,19 @@ export default class Patients extends Component {
           notes: null,
         },
       ],
+     alert:false,
     };
   }
   handleChange = async (e,index) => {
     // console.log(e,index,"ggggggg")
     let patientsArr=this.state.patientsArr;
     patientsArr[index][e.target.name]=e.target.value;
-    await this.setState({patientsArr:patientsArr})
+    await this.setState({patientsArr:patientsArr,alert:false})
   };
   handleChangeAddress = async (e,value,index) => {
     console.log(e,index,value,"adress value here")
     let patientsArr=this.state.patientsArr;
-     patientsArr[index][e.target.name]=value;
+     patientsArr[index]["address1"]=value;
      await this.setState({patientsArr:patientsArr})
   };
 
@@ -67,11 +68,14 @@ export default class Patients extends Component {
     });
     console.log(this.state.patientsArr, "👑👑");
   };
-  alert=()=>{
+  Alert=()=>{
+
+    if(this.state.alert===true){
     return(<><Alert variant="filled" severity="success">
     This is a success alert — check it out!
   </Alert></>)
-    
+     }
+     return null;
   }
   removeDetails = (index) => {
  console.log(index,"🎯🎯🎯")
@@ -97,7 +101,8 @@ export default class Patients extends Component {
     phone: doc.data().phone,
     email: doc.data().email,
     address1: doc.data().address1,
-    notes: doc.data().notes}
+    notes: doc.data().notes,
+    }
       
     });
     
@@ -111,13 +116,14 @@ export default class Patients extends Component {
       email: null,
       address1: null,
       notes: null,
+     
     })
     this.setState({patientsArr:patientArr})
     
   }
 
   submitData=async()=>{
-    console.log("entering ....")
+    
     const patientData=db.collection("patientData");
     const snapshot= await patientData.get();
     const batch = db.batch();
@@ -128,6 +134,8 @@ export default class Patients extends Component {
   for(let i=0;i<this.state.patientsArr.length;i++){
     await patientData.doc(i.toString()).set(this.state.patientsArr[i]);
   } 
+  this.setState({alert:true})
+ 
   }
 
   componentDidMount(){
@@ -174,7 +182,7 @@ export default class Patients extends Component {
           >
             Hayes Valley Health Scan Francisco
           </Typography>
-          
+          <this.Alert/>
           </Box>
             <Typography
               variant="h6"
@@ -357,9 +365,10 @@ export default class Patients extends Component {
                 </Button>
               </Grid>
               <Grid item xs={12} sx={{m:8,ml:5,mr:5}}>
-            <Button variant="contained" fullWidth sx={{ borderRadius: 25,mb:10,color:"white",bgcolor:"#0B2B5B;"}} onClick={this.submitData}>
+            <Button variant="contained" fullWidth sx={{ borderRadius: 25,mb:10,color:"white",bgcolor:"#0B2B5B;"}} onClick={this.submitData} onMouseLeave={this.Alert}>
               Send Referrels
             </Button>
+            
             </Grid>
           </Box>
           <br/>
