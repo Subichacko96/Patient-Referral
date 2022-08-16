@@ -167,7 +167,7 @@ export default class Patients extends Component {
   }
   render() {
     return (<>
-      <Container maxWidth="lg" sx={{ bgcolor: "#E5E5E5" }}>
+      <Container  xs={12} md={12} sx={{ bgcolor: "#E5E5E5" }}>
         <AppBar position="static" sx={{ mt: 3, bgcolor: "black" }}>
           <Toolbar>
             <IconButton
@@ -185,7 +185,7 @@ export default class Patients extends Component {
           </Toolbar>
         </AppBar>
 
-        <Box sx={{ bgcolor: "#c1e3dd", m: 10 }}>
+        <Box  xs={12} md={8} sx={{ bgcolor: "#c1e3dd", m: 10 }}>
           <Box sx={{ bgcolor: "white" }}>
             <Typography
               color="#0B2B5B"
@@ -226,9 +226,8 @@ export default class Patients extends Component {
           >
             You can add upto five patients at a time
           </Typography>
-          <Card
+          <Card xs={12} md={12}
             sx={{
-              minWidth: 275,
               bgcolor: "white",
               mx: "auto",
               ml: 5,
@@ -245,22 +244,23 @@ export default class Patients extends Component {
               //console.log(length,"my length")
               return (
                 <>
-                  <Accordion
+                   <Container xs={12} md={12} lg={12}  sx={{ position: "static" }}>
+                  <Accordion  xs={12} md={8}
                     sx={{ mt: 1, borderRadius: 1 }}
                     defaultExpanded={false}
                   >
-                    <AccordionSummary
+                    <AccordionSummary xs={12} md={8}
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
                       id="panel1a-header"
                     >
-                      <Typography
+                      <Typography 
                         fullWidth
                         sx={{
                           float: "left",
                           backgroundColor: "#25A575;",
                           p: 1,
-                          width: 20,
+                         
                           color: "white",
                           mr: 3,
                         }}
@@ -268,8 +268,8 @@ export default class Patients extends Component {
                         {index + 1}
                       </Typography>
                       <Typography
-                        variant="h5"
-                        sx={{ textAlign: "left", width: 700 }}
+                        variant="h6"
+                        sx={{ textAlign: "left" }}
                       >
                         {fullName}
                       </Typography>
@@ -440,6 +440,7 @@ export default class Patients extends Component {
                       </Grid>
                     </AccordionDetails>
                   </Accordion>
+                  </Container>
                 </>
               );
             })}
