@@ -20,11 +20,11 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Alert from "@mui/material/Alert";
-import DeleteIcon from "@mui/icons-material/Delete";
 import db from "../config";
 import { address } from "./AddressList";
 import CircularProgress from "@mui/material/CircularProgress";
 import Backdrop from '@mui/material/Backdrop';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default class Patients extends Component {
   constructor(props) {
@@ -42,7 +42,8 @@ export default class Patients extends Component {
           notes: null,
         },
       ],
-      alert: false,
+      alert: "",
+      alertError:true,
       isLoading: false,
     };
   }
@@ -50,7 +51,7 @@ export default class Patients extends Component {
     // console.log(e,index,"ggggggg")
     let patientsArr = this.state.patientsArr;
     patientsArr[index][e.target.name] = e.target.value;
-    await this.setState({ patientsArr: patientsArr, alert: false });
+    await this.setState({ patientsArr: patientsArr, alert: "" });
   };
   handleChangeAddress = async (e, value, index) => {
     console.log(e, index, value, "adress value here");
@@ -60,6 +61,18 @@ export default class Patients extends Component {
   };
 
   addPatientData = () => {
+    if(this.state.patientsArr[this.state.patientsArr.length-1].firstName!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].lastName!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].dob!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].contactLanguage!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].phone!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].email!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].address1!==""
+    ){
+      this.setState({alert:"Fields cannot be empty !!",alertError:true})
+      return;
+
+    }
     let obj = {
       firstName: null,
       lastName: null,
@@ -79,11 +92,11 @@ export default class Patients extends Component {
     console.log(this.state.patientsArr, "👑👑");
   };
   Alert = () => {
-    if (this.state.alert === true) {
+    if (this.state.alert !=="") {
       return (
         <>
-          <Alert variant="filled" severity="success">
-            Patient Referrals sent successfully!
+          <Alert variant="filled" severity={this.state.alertError?"error":"success"}>
+           {this.state.alert}
           </Alert>
         </>
       );
@@ -134,6 +147,18 @@ export default class Patients extends Component {
   };
 
   submitData = async () => {
+    if(this.state.patientsArr[this.state.patientsArr.length-1].firstName!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].lastName!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].dob!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].contactLanguage!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].phone!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].email!==""||
+    this.state.patientsArr[this.state.patientsArr.length-1].address1!==""
+    ){
+      this.setState({alert:"Fields cannot be empty !!",alertError:true})
+      return;
+
+    }
     this.setState({ isLoading: true });
     const patientData = db.collection("patientData");
     const snapshot = await patientData.get();
@@ -145,7 +170,7 @@ export default class Patients extends Component {
     for (let i = 0; i < this.state.patientsArr.length; i++) {
       await patientData.doc(i.toString()).set(this.state.patientsArr[i]);
     }
-    this.setState({ alert: true, isLoading: false });
+    this.setState({ alert: "Data sent successfully !", alertError:false,isLoading: false });
   };
 
   setLoader = () => {
@@ -185,7 +210,7 @@ export default class Patients extends Component {
           </Toolbar>
         </AppBar>
 
-        <Box  xs={12} md={8} sx={{ bgcolor: "#c1e3dd", m: 10 }}>
+        <Box  xs={12} md={12} lg={12} sx={{ bgcolor: "#c1e3dd" }}>
           <Box sx={{ bgcolor: "white" }}>
             <Typography
               color="#0B2B5B"
@@ -249,8 +274,10 @@ export default class Patients extends Component {
                     sx={{ mt: 1, borderRadius: 1 }}
                     defaultExpanded={false}
                   >
-                    <AccordionSummary xs={12} md={8}
-                      expandIcon={<ExpandMoreIcon />}
+                    <AccordionSummary xs={12} md={8} 
+                      expandIcon={<><ExpandMoreIcon  sx={{ position: "relative" ,right:"0px" }} />
+                      </>
+                    }
                       aria-controls="panel1a-content"
                       id="panel1a-header"
                     >
@@ -260,26 +287,25 @@ export default class Patients extends Component {
                           float: "left",
                           backgroundColor: "#25A575;",
                           p: 1,
-                         
+                          
                           color: "white",
                           mr: 3,
                         }}
                       >
                         {index + 1}
                       </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{ textAlign: "left" }}
+                      <Typography 
+                        sx={{ textAlign: "left",fontWeight:800,fontSize:"20px",marginRight:"20px"}}
                       >
                         {fullName}
                       </Typography>
-                      <Typography sx={{ position: "static" }}>
-                        {" "}
-                        <DeleteIcon
-                          onClick={() => this.removeDetails(index)}
-                          sx={{ float: "right" }}
-                        />
-                      </Typography>
+                     
+                      <DeleteIcon
+                      onClick={() => this.removeDetails(index)}
+                      sx={{ position: "absolute" ,right:"40px",top:"20px",bottom:"20px"}}
+                     />
+                       
+                      
                     </AccordionSummary>
 
                     <AccordionDetails>
@@ -466,7 +492,7 @@ export default class Patients extends Component {
                 bgcolor: "#0B2B5B;",
               }}
               onClick={this.submitData}
-              onMouseLeave={this.Alert}
+              // onMouseLeave={this.Alert}
             >
               Send Referrels
             </Button>
