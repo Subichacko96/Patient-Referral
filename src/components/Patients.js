@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -23,55 +23,53 @@ import Alert from "@mui/material/Alert";
 import db from "../config";
 import { address } from "./AddressList";
 import CircularProgress from "@mui/material/CircularProgress";
-import Backdrop from '@mui/material/Backdrop';
-import DeleteIcon from '@mui/icons-material/Delete';
+import Backdrop from "@mui/material/Backdrop";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-export default class Patients extends Component {
-  constructor(props) {
-    super();
-    this.state = {
-      patientsArr: [
-        {
-          firstName: null,
-          lastName: null,
-          dob: null,
-          contactLanguage: null,
-          phone: null,
-          email: null,
-          address1: null,
-          notes: null,
-        },
-      ],
-      alert: "",
-      alertError:true,
-      isLoading: false,
-    };
-  }
-  handleChange = async (e, index) => {
-    // console.log(e,index,"ggggggg")
-    let patientsArr = this.state.patientsArr;
-    patientsArr[index][e.target.name] = e.target.value;
-    await this.setState({ patientsArr: patientsArr, alert: "" });
+export default function Patients() {
+  const [patientArr, setPatientArr] = useState([
+    {
+      firstName: null,
+      lastName: null,
+      dob: null,
+      contactLanguage: null,
+      phone: null,
+      email: null,
+      address1: null,
+      notes: null,
+    },
+  ]);
+  const [alert, setAlert] = useState("");
+  const [alertError, setAlertError] = useState(true);
+  const [isLoading, setisLoading] = useState(false);
+
+  const handleChange = async (e, index) => {
+    let patientArrayCopy = [...patientArr];
+    patientArrayCopy[index][e.target.name] = e.target.value;
+    setPatientArr(patientArrayCopy);
+    if (alert !== "") {
+      setAlert("");
+    }
   };
-  handleChangeAddress = async (e, value, index) => {
-    console.log(e, index, value, "adress value here");
-    let patientsArr = this.state.patientsArr;
-    patientsArr[index]["address1"] = value;
-    await this.setState({ patientsArr: patientsArr });
+  const handleChangeAddress = async (e, value, index) => {
+    let patientArrayCopy = [...patientArr];
+    patientArrayCopy[index]["address1"] = value;
+    setPatientArr(patientArrayCopy);
   };
 
-  addPatientData = () => {
-    if(this.state.patientsArr[this.state.patientsArr.length-1].firstName!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].lastName!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].dob!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].contactLanguage!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].phone!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].email!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].address1!==""
-    ){
-      this.setState({alert:"Fields cannot be empty !!",alertError:true})
+  const addPatientData = () => {
+    if (
+      patientArr[patientArr.length - 1].firstName === null ||
+      patientArr[patientArr.length - 1].lastName === null ||
+      patientArr[patientArr.length - 1].dob === null ||
+      patientArr[patientArr.length - 1].contactLanguage === null ||
+      patientArr[patientArr.length - 1].phone === null ||
+      patientArr[patientArr.length - 1].email === null ||
+      patientArr[patientArr.length - 1].address1 === null
+    ) {
+      setAlert("Fields cannot be empty !!");
+      setAlertError(true);
       return;
-
     }
     let obj = {
       firstName: null,
@@ -83,43 +81,22 @@ export default class Patients extends Component {
       address1: null,
       notes: null,
     };
-    let arr = this.state.patientsArr;
+    let arr = [...patientArr];
 
     arr.push(obj);
-    this.setState({
-      patientsArr: arr,
-    });
-    console.log(this.state.patientsArr, "👑👑");
+    setPatientArr(arr);
   };
-  Alert = () => {
-    if (this.state.alert !=="") {
-      return (
-        <>
-          <Alert variant="filled" severity={this.state.alertError?"error":"success"}>
-           {this.state.alert}
-          </Alert>
-        </>
-      );
-    }
-    return null;
-  };
-  removeDetails = (index) => {
-    console.log(index, "🎯🎯🎯");
-    const patientsData = this.state.patientsArr;
-    // const key_index = this.state.eventArr[index];
 
+  const removeDetails = (index) => {
+    const patientsData = [...patientArr];
     patientsData.splice(index, 1);
-
-    this.setState({
-      patientsArr: patientsData,
-    });
-    console.log(this.state.patientsArr);
+    setPatientArr(patientsData);
   };
-  initializeData = async () => {
-    this.setState({isLoading:true})
+  const initializeData = async () => {
+    setisLoading(true);
     const patientData = db.collection("patientData");
     const snapshot = await patientData.get();
-    const patientArr = snapshot.docs.map((doc) => {
+    const patientArrData = snapshot.docs.map((doc) => {
       // console.log(doc.data().firstName,"hhhhhhhhhhhhh")
       return {
         firstName: doc.data().firstName,
@@ -133,7 +110,7 @@ export default class Patients extends Component {
       };
     });
 
-    patientArr.push({
+    patientArrData.push({
       firstName: null,
       lastName: null,
       dob: null,
@@ -143,23 +120,25 @@ export default class Patients extends Component {
       address1: null,
       notes: null,
     });
-    this.setState({ patientsArr: patientArr,isLoading:false });
+    setPatientArr(patientArrData);
+    setisLoading(false);
   };
 
-  submitData = async () => {
-    if(this.state.patientsArr[this.state.patientsArr.length-1].firstName!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].lastName!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].dob!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].contactLanguage!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].phone!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].email!==""||
-    this.state.patientsArr[this.state.patientsArr.length-1].address1!==""
-    ){
-      this.setState({alert:"Fields cannot be empty !!",alertError:true})
+  const submitData = async () => {
+    if (
+      patientArr[patientArr.length - 1].firstName === null ||
+      patientArr[patientArr.length - 1].lastName === null ||
+      patientArr[patientArr.length - 1].dob === null ||
+      patientArr[patientArr.length - 1].contactLanguage === null ||
+      patientArr[patientArr.length - 1].phone === null ||
+      patientArr[patientArr.length - 1].email === null ||
+      patientArr[patientArr.length - 1].address1 === null
+    ) {
+      setAlert("Fields cannot be empty !!");
+      setAlertError(true);
       return;
-
     }
-    this.setState({ isLoading: true });
+    setisLoading(true);
     const patientData = db.collection("patientData");
     const snapshot = await patientData.get();
     const batch = db.batch();
@@ -167,32 +146,25 @@ export default class Patients extends Component {
       batch.delete(doc.ref);
     });
     await batch.commit();
-    for (let i = 0; i < this.state.patientsArr.length; i++) {
-      await patientData.doc(i.toString()).set(this.state.patientsArr[i]);
+    for (let i = 0; i < patientArr.length; i++) {
+      await patientData.doc(i.toString()).set(patientArr[i]);
     }
-    this.setState({ alert: "Data sent successfully !", alertError:false,isLoading: false });
+    setAlert("Data sent successfully !");
+    setAlertError(false);
+    setisLoading(false);
   };
 
-  setLoader = () => {
-    return (
-      <>
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={this.state.isLoading}
-          
-        >
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      </>
-    );
+  const setLoader = () => {
+    return <></>;
   };
+  useEffect(() => {
+    console.log("ivde veendum call ayi");
+    initializeData();
+  }, []);
 
-  componentDidMount() {
-    this.initializeData();
-  }
-  render() {
-    return (<>
-      <Container  xs={12} md={12} sx={{ bgcolor: "#E5E5E5" }}>
+  return (
+    <>
+      <Container xs={12} md={12} sx={{ bgcolor: "#E5E5E5" }}>
         <AppBar position="static" sx={{ mt: 3, bgcolor: "black" }}>
           <Toolbar>
             <IconButton
@@ -210,7 +182,7 @@ export default class Patients extends Component {
           </Toolbar>
         </AppBar>
 
-        <Box  xs={12} md={12} lg={12} sx={{ bgcolor: "#c1e3dd" }}>
+        <Box xs={12} md={12} lg={12} sx={{ bgcolor: "#c1e3dd" }}>
           <Box sx={{ bgcolor: "white" }}>
             <Typography
               color="#0B2B5B"
@@ -234,7 +206,12 @@ export default class Patients extends Component {
             >
               Hayes Valley Health Scan Francisco
             </Typography>
-            <this.Alert />
+            {alert !== "" && (
+              <Alert
+                variant="filled"
+                severity={alertError ? "error" : "success"}
+              >{alert}</Alert>
+            )}
           </Box>
           <Typography
             variant="h6"
@@ -251,7 +228,9 @@ export default class Patients extends Component {
           >
             You can add upto five patients at a time
           </Typography>
-          <Card xs={12} md={12}
+          <Card
+            xs={12}
+            md={12}
             sx={{
               bgcolor: "white",
               mx: "auto",
@@ -261,211 +240,217 @@ export default class Patients extends Component {
               p: 3,
             }}
           >
-            {this.state.patientsArr.map((data, index) => {
-              const length = this.state.patientsArr.length;
+            {patientArr.map((data, index) => {
               const fullName = data.firstName
                 ? data.firstName + " " + (data.lastName ?? "")
                 : "New Referral";
               //console.log(length,"my length")
               return (
                 <>
-                   <Container xs={12} md={12} lg={12}  sx={{ position: "static" }}>
-                  <Accordion  xs={12} md={8}
-                    sx={{ mt: 1, borderRadius: 1 }}
-                    defaultExpanded={false}
+                  <Container
+                    xs={12}
+                    md={12}
+                    lg={12}
+                    sx={{ position: "static" }}
                   >
-                    <AccordionSummary xs={12} md={8} 
-                      expandIcon={<><ExpandMoreIcon  sx={{ position: "relative" ,right:"0px" }} />
-                      </>
-                    }
-                      aria-controls="panel1a-content"
-                      id="panel1a-header"
+                    <Accordion
+                      xs={12}
+                      md={8}
+                      sx={{ mt: 1, borderRadius: 1 }}
+                      defaultExpanded={false}
                     >
-                      <Typography 
-                        fullWidth
-                        sx={{
-                          float: "left",
-                          backgroundColor: "#25A575;",
-                          p: 1,
-                          
-                          color: "white",
-                          mr: 3,
-                        }}
+                      <AccordionSummary
+                        xs={12}
+                        md={8}
+                        expandIcon={
+                          <>
+                            <ExpandMoreIcon
+                              sx={{ position: "relative", right: "0px" }}
+                            />
+                          </>
+                        }
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
                       >
-                        {index + 1}
-                      </Typography>
-                      <Typography 
-                        sx={{ textAlign: "left",fontWeight:800,fontSize:"20px",marginRight:"20px"}}
-                      >
-                        {fullName}
-                      </Typography>
-                     
-                      <DeleteIcon
-                      onClick={() => this.removeDetails(index)}
-                      sx={{ position: "absolute" ,right:"40px",top:"20px",bottom:"20px"}}
-                     />
-                       
-                      
-                    </AccordionSummary>
+                        <Typography
+                          fullWidth
+                          sx={{
+                            float: "left",
+                            backgroundColor: "#25A575;",
+                            p: 1,
 
-                    <AccordionDetails>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            required
-                            id="firstName"
-                            sx={{ color: "gray" }}
-                            name="firstName"
-                            value={data.firstName ?? ""}
-                            onChange={(event) =>
-                              this.handleChange(event, index)
-                            }
-                            label="First name"
-                            fullWidth
-                            autoComplete="given-name"
-                            variant="standard"
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            required
-                            id="lastName"
-                            sx={{ color: "gray" }}
-                            name="lastName"
-                            value={data.lastName ?? ""}
-                            onChange={(event) =>
-                              this.handleChange(event, index)
-                            }
-                            label="Last name"
-                            fullWidth
-                            autoComplete="family-name"
-                            variant="standard"
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <Input
-                            type="Date"
-                            sx={{ mt: 2, color: "gray" }}
-                            required
-                            id="dob"
-                            name="dob"
-                            value={data.dob ?? ""}
-                            onChange={(event) =>
-                              this.handleChange(event, index)
-                            }
-                            label="Date Of Birth"
-                            fullWidth
-                            autoComplete="given-dob"
-                            variant="standard"
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            required
-                            id="contactLanguage"
-                            sx={{ color: "gray" }}
-                            name="contactLanguage"
-                            value={data.contactLanguage ?? ""}
-                            onChange={(event) =>
-                              this.handleChange(event, index)
-                            }
-                            label="Contact Language"
-                            fullWidth
-                            autoComplete="contact-lang"
-                            variant="standard"
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <Input
-                            type="Number"
-                            required
-                            id="phone"
-                            sx={{ mt: 2, color: "black" }}
-                            name="phone"
-                            value={data.phone ?? ""}
-                            onChange={(event) =>
-                              this.handleChange(event, index)
-                            }
-                            placeholder="Phone Number"
-                            label="Number"
-                            fullWidth
-                            autoComplete="given-phn"
-                            variant="standard"
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            required
-                            id="email"
-                            sx={{ color: "gray" }}
-                            name="email"
-                            value={data.email ?? ""}
-                            onChange={(event) =>
-                              this.handleChange(event, index)
-                            }
-                            label="Email"
-                            fullWidth
-                            autoComplete="contact-email"
-                            variant="standard"
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          {/* <TextField
+                            color: "white",
+                            mr: 3,
+                          }}
+                        >
+                          {index + 1}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            textAlign: "left",
+                            fontWeight: 800,
+                            fontSize: "20px",
+                            marginRight: "20px",
+                          }}
+                        >
+                          {fullName}
+                        </Typography>
+
+                        <DeleteIcon
+                          onClick={() => removeDetails(index)}
+                          sx={{
+                            position: "absolute",
+                            right: "40px",
+                            top: "20px",
+                            bottom: "20px",
+                          }}
+                        />
+                      </AccordionSummary>
+
+                      <AccordionDetails>
+                        <Grid container spacing={3}>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              required
+                              id="firstName"
+                              sx={{ color: "gray" }}
+                              name="firstName"
+                              value={data.firstName ?? ""}
+                              onChange={(event) => handleChange(event, index)}
+                              label="First name"
+                              fullWidth
+                              autoComplete="given-name"
+                              variant="standard"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              required
+                              id="lastName"
+                              sx={{ color: "gray" }}
+                              name="lastName"
+                              value={data.lastName ?? ""}
+                              onChange={(event) => handleChange(event, index)}
+                              label="Last name"
+                              fullWidth
+                              autoComplete="family-name"
+                              variant="standard"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Input
+                              type="Date"
+                              sx={{ mt: 2, color: "gray" }}
+                              required
+                              id="dob"
+                              name="dob"
+                              value={data.dob ?? ""}
+                              onChange={(event) => handleChange(event, index)}
+                              label="Date Of Birth"
+                              fullWidth
+                              autoComplete="given-dob"
+                              variant="standard"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              required
+                              id="contactLanguage"
+                              sx={{ color: "gray" }}
+                              name="contactLanguage"
+                              value={data.contactLanguage ?? ""}
+                              onChange={(event) => handleChange(event, index)}
+                              label="Contact Language"
+                              fullWidth
+                              autoComplete="contact-lang"
+                              variant="standard"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Input
+                              type="Number"
+                              required
+                              id="phone"
+                              sx={{ mt: 2, color: "black" }}
+                              name="phone"
+                              value={data.phone ?? ""}
+                              onChange={(event) => handleChange(event, index)}
+                              placeholder="Phone Number"
+                              label="Number"
+                              fullWidth
+                              autoComplete="given-phn"
+                              variant="standard"
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              required
+                              id="email"
+                              sx={{ color: "gray" }}
+                              name="email"
+                              value={data.email ?? ""}
+                              onChange={(event) => handleChange(event, index)}
+                              label="Email"
+                              fullWidth
+                              autoComplete="contact-email"
+                              variant="standard"
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            {/* <TextField
                           required
                           id="address1" sx={{color:"gray"}}
                           name="address1" value={data.address1??""}
-                          onChange={(event) => this.handleChange(event, index)}
+                          onChange={(event) => handleChange(event, index)}
                           label="Address line 1"
                           fullWidth
                           autoComplete=""
                           variant="standard"
                          
                         /> */}
-                          {/* <Autocomplete
+                            {/* <Autocomplete
                           id="free-solo-demo"  name="address1" value={data.address1??""}
-                          // onChange={(event) => this.handleChange(event, index)}
+                          // onChange={(event) => handleChange(event, index)}
                           address1
                           options={address.map((option) => option.streetAddress)}
                           renderInput={(params) => <TextField { ...params 
-                        }  onChange={(event) => this.handleChange(event, index)} label="Address" />}/> */}
-                          <Autocomplete
-                            name="address1"
-                            value={data.address1 ?? ""}
-                            sx={{ borderTop: "none" }}
-                            options={address.map(
-                              (option) => option.streetAddress
-                            )}
-                            onChange={(event, value) =>
-                              this.handleChangeAddress(event, value, index)
-                            } // prints the selected value
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Address"
-                                variant="standard"
-                                fullWidth
-                              />
-                            )}
-                          />
+                        }  onChange={(event) => handleChange(event, index)} label="Address" />}/> */}
+                            <Autocomplete
+                              name="address1"
+                              value={data.address1 ?? ""}
+                              sx={{ borderTop: "none" }}
+                              options={address.map(
+                                (option) => option.streetAddress
+                              )}
+                              onChange={(event, value) =>
+                                handleChangeAddress(event, value, index)
+                              } // prints the selected value
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Address"
+                                  variant="standard"
+                                  fullWidth
+                                />
+                              )}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sx={{ mb: 2 }}>
+                            <TextField
+                              id="Notes"
+                              sx={{ color: "gray" }}
+                              name="notes"
+                              value={data.notes ?? ""}
+                              onChange={(event) => handleChange(event, index)}
+                              label="Notes/Reasons"
+                              fullWidth
+                              autoComplete="notes-reasons"
+                              variant="standard"
+                            />
+                          </Grid>
                         </Grid>
-                        <Grid item xs={12} sx={{ mb: 2 }}>
-                          <TextField
-                            id="Notes"
-                            sx={{ color: "gray" }}
-                            name="notes"
-                            value={data.notes ?? ""}
-                            onChange={(event) =>
-                              this.handleChange(event, index)
-                            }
-                            label="Notes/Reasons"
-                            fullWidth
-                            autoComplete="notes-reasons"
-                            variant="standard"
-                          />
-                        </Grid>
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>
+                      </AccordionDetails>
+                    </Accordion>
                   </Container>
                 </>
               );
@@ -474,10 +459,10 @@ export default class Patients extends Component {
           <Grid item xs={12} sx={{ mt: 1, mb: 5 }}>
             <Button
               variant="text"
-              onClick={this.addPatientData}
+              onClick={addPatientData}
               sx={{ color: "#0B2B5B" }}
             >
-              {" "}
+              {console.log("render called")}
               <Icon>add_circle</Icon>Add New Patient
             </Button>
           </Grid>
@@ -491,8 +476,8 @@ export default class Patients extends Component {
                 color: "white",
                 bgcolor: "#0B2B5B;",
               }}
-              onClick={this.submitData}
-              // onMouseLeave={this.Alert}
+              onClick={submitData}
+              // onMouseLeave={Alert}
             >
               Send Referrels
             </Button>
@@ -500,8 +485,12 @@ export default class Patients extends Component {
         </Box>
         <br />
       </Container>
-      <this.setLoader/>
-      </>
-    );
-  }
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    </>
+  );
 }
